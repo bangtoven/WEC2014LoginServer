@@ -67,7 +67,7 @@ class UsersController < ApplicationController
                     user.update(count: user.count+1)
                     format.html { redirect_to user, notice: 'User was successfully logged in.' }
                 else
-                    @user.errors.add(:error_code, "-3")                    
+                    @user.errors.add(:error_code, "-4")                    
                     format.html { render :new }
                 end
             end
