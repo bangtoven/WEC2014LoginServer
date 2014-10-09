@@ -64,6 +64,7 @@ class UsersController < ApplicationController
             user = User.find_by(username: username, password:password)
             respond_to do |format|
                 if user != nil
+                    user.update(count: user.count+1)
                     format.html { redirect_to user, notice: 'User was successfully logged in.' }
                 else
                     @user.errors.add(:error_code, "-3")                    
