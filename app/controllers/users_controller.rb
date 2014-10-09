@@ -1,5 +1,10 @@
 class UsersController < ApplicationController
+    before_action :set_user, only: [:show]
     skip_before_action :verify_authenticity_token
+  
+    def home
+        
+    end
   
     def signup
         user = User.new
@@ -11,8 +16,8 @@ class UsersController < ApplicationController
             user.save
             render json: {user_name: user.username, login_count: user.count}        
         else
-            error = user.errors.values.flatten.first.to_i
-            render json: {error_code: error}
+            error = user.errors.values.flatten.first
+            render json: {error_code: error.to_i}
         end
     end
     
@@ -33,8 +38,39 @@ class UsersController < ApplicationController
         render :nothing => true
     end
 
-    def index
-        @users = User.all
+    # GET /users/new
+    def new
+        @user = User.new
+    end
+
+    # POST /users
+    # POST /users.json
+    def create
+        @user = User.new(user_params)
+        action = params[:commit]
+        if action == "Add User"
+            respond_to do |format|
+                if @user.valid?
+                    @user.count = 1
+                    @user.save
+                    format.html { redirect_to @user, notice: 'User was successfully created.' }
+                else
+                    format.html { render :new }
+                end
+            end
+        elsif action == "Login"
+            username = params[:user][:username]
+            password = params[:user][:password]
+            user = User.find_by(username: username, password:password)
+            respond_to do |format|
+                if user != nil
+                    format.html { redirect_to user, notice: 'User was successfully logged in.' }
+                else
+                    @user.errors.add(:error_code, "-3")                    
+                    format.html { render :new }
+                end
+            end
+        end
     end
 
     # GET /users/1
@@ -42,53 +78,8 @@ class UsersController < ApplicationController
     def show
     end
 
-    # GET /users/new
-    def new
-        @user = User.new
-    end
-
-    # GET /users/1/edit
-    def edit
-    end
-
-    # POST /users
-    # POST /users.json
-    def create
-        @user = User.new(user_params)
-
-        respond_to do |format|
-            if @user.save
-                format.html { redirect_to @user, notice: 'User was successfully created.' }
-                format.json { render :show, status: :created, location: @user }
-            else
-                format.html { render :new }
-                format.json { render json: @user.errors, status: :unprocessable_entity }
-            end
-        end
-    end
-
-    # PATCH/PUT /users/1
-    # PATCH/PUT /users/1.json
-    def update
-        respond_to do |format|
-            if @user.update(user_params)
-                format.html { redirect_to @user, notice: 'User was successfully updated.' }
-                format.json { render :show, status: :ok, location: @user }
-            else
-                format.html { render :edit }
-                format.json { render json: @user.errors, status: :unprocessable_entity }
-            end
-        end
-    end
-
-    # DELETE /users/1
-    # DELETE /users/1.json
-    def destroy
-        @user.destroy
-        respond_to do |format|
-            format.html { redirect_to users_url, notice: 'User was successfully destroyed.' }
-            format.json { head :no_content }
-        end
+    def index
+        @users = User.all
     end
 
     private
