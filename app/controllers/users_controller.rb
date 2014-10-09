@@ -5,12 +5,14 @@ class UsersController < ApplicationController
         user = User.new
         user.username = params[:username]
         user.password = params[:password]
-        user.count = 1
         
-        if user.save
+        if user.valid?
+            user.count = 1
+            user.save
             render json: {user_name: user.username, login_count: user.count}        
         else
-            
+            error = user.errors.values.flatten.first.to_i
+            render json: {error_code: error}
         end
     end
     
